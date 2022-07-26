@@ -7,12 +7,12 @@ export default function Calculator() {
    const [currentVar, setCurrentVar] = useState("")
    const [currentOperation, setCurrentOperation] = useState("")
    const [result, setResult] = useState("")
-   const [inputMax, setInputMax] = useState("")
-   const [inputMin, setInputMin] = useState("")
-   const [maxLimit, setMaxLimit] = useState("")
-   const [minLimit, setMinLimit] = useState("0")
    const [inputInRoot, setinputInRoot] = useState("")
    const [inputRootPotencyNumber, setInputRootPotencyNumber] = useState("")
+ 
+   let root = "√"
+   let exponential = "e"
+   let variableX = "x"
  
    const alertP = () => {
        return alert("Invalid input!")
@@ -26,9 +26,12 @@ export default function Calculator() {
            return false
    }
  
-   let root = "√"
-   let exponential = "e"
-   let variableX = "x"
+   function changeIndividual(id, act){
+       if(act = "show")
+           document.getElementById(id).classList.remove("d-none")
+       else if(act = "hide")
+           document.getElementById(id).classList.add("d-none")
+   }
  
    /*this function will be called every time a digit is clicked (except: root, exponential and x with potency (different cases))*/
    function insert(n) {
@@ -42,12 +45,6 @@ export default function Calculator() {
                setinputInRoot(inputInRoot + n)
            else
                setInputRootPotencyNumber(inputRootPotencyNumber + n)
-       } else if (!checkVisibilityClassListByID("delimiteIntegral")) {
-           //if delimiteIntegral modal is open and the maxLimit input contains sent, so, the focus will be in inputMin + the current var
-           if (!document.getElementById("maxLimit").classList.contains("sent"))
-               setInputMax(inputMax + n)
-           else
-               setInputMin(inputMin + n)
        } else {
            if (n == "+" || n == "-") {
                setCurrentOperator(n)
@@ -57,7 +54,6 @@ export default function Calculator() {
                setCurrentOperation(currentOperation + n)
            //input calculation will grow with current n
            setInputCalculation(inputCalculation + n)
-           console.log(currentOperation)
        }
    }
  
@@ -71,9 +67,6 @@ export default function Calculator() {
            last = "cos"
        else if (last.includes("n"))
            last = "sen"
- 
-       console.log("n: " + n)
-       console.log("last: " + last)
  
        //if the last and currrent equals will be trigger an alert and return 0
        if (isNaN(last) && n == last) {
@@ -153,181 +146,57 @@ export default function Calculator() {
        return result
    }
  
-   /* this function is controll modal */
-   function changeModalDelimiteIntegral(checked) {
-       if (checked) {
-           document.getElementById("limitOfIntegralText").classList.remove("d-none")
-           document.getElementById("delimiteIntegral").classList.remove("d-none")
+   function changeModal(id, v) {
+       if (document.getElementById(id).classList.contains("d-none")) {
+           document.getElementById(id).classList.remove("d-none")
        } else
-           document.getElementById("delimiteIntegral").classList.add("d-none")
+           document.getElementById(id).classList.add("d-none")
+       setCurrentVar(v)
    }
  
-   function changeRootModal(op) {
-       if (document.getElementById("rootPotencyIntegral").classList.contains("d-none")) {
-           document.getElementById("rootPotencyIntegral").classList.remove("d-none")
-       } else
-           document.getElementById("rootPotencyIntegral").classList.add("d-none")
-       setCurrentVar(op)
-   }
- 
-   function changePotencyModal(op) {
-       if (document.getElementById("potencyIntegral").classList.contains("d-none")) {
-           document.getElementById("potencyIntegral").classList.remove("d-none")
-       } else
-           document.getElementById("potencyIntegral").classList.add("d-none")
-       setCurrentVar(op)
-   }
- 
- 
+   /* this function is called when the button of inputinRoot is clicked */
    function sendinputInRoot() {
+       //x is required in input
        if (!inputInRoot.includes(variableX))
            alert("it is necessary to have x in the root content")
        else {
+           var aux = "(" + inputRootPotencyNumber + "^" + root + inputInRoot + ")"
            document.getElementById("rootPotencyIntegral").classList.add("d-none")
-           setInputCalculation(inputCalculation + "(" + inputRootPotencyNumber + "^" + root + inputInRoot + ")")
-           setCurrentOperation("(" + inputRootPotencyNumber + "^" + root + inputInRoot + ")")
+           setInputCalculation(inputCalculation + aux)
+           setCurrentOperation(aux)
            document.getElementById("potencyNumberRoot").classList.remove("sent")
            setInputRootPotencyNumber("")
            setinputInRoot("")
        }
    }
  
-   /* this const is called when the button of potencynumberroot is clicked, and this will be marked as 'sent' and the focus will be directed to another field  */
-   const sendRootPotency = () => {
+   /* this function is called when the button of potencynumberroot is clicked, and this will be marked as 'sent' and the focus will be directed to another field  */
+   function sendRootPotency() {
        document.getElementById("potencyNumberRoot").classList.add("sent")
    }
  
-   /* this const is called to control the focus below the inputs */
-   const sendPotency = () => {
-       var open = document.getElementById("rootPotencyIntegral").classList.contains("d-none")
+   /* this function is called to control the focus below the inputs */
+   function sendPotency() {
+       var open = document.getElementById("rootPotencyIntegral").classList.contains("d-none"),
+           aux = currentVar + "^" + inputPotencyNumber
  
        if (!open)
-           setinputInRoot(inputInRoot + currentVar + "^" + inputPotencyNumber)
+           setinputInRoot(inputInRoot + aux)
        else
-           setInputCalculation(inputCalculation + currentVar + "^" + inputPotencyNumber)
+           setInputCalculation(inputCalculation + aux)
  
-       setCurrentOperation(currentOperation + (!open ? inputInRoot : "") + currentVar + "^" + inputPotencyNumber)
+       setCurrentOperation(currentOperation + (!open ? inputInRoot : "") + aux)
  
        console.log(currentVar)
        document.getElementById("potencyIntegral").classList.add("d-none")
        setInputPotencyNumber("")
    }
  
-   /* this const is called to sent the max limit */
-   const sendMax = () => {
-       setMaxLimit(inputMax)
- 
-       //before sent, the id "maxLimit" will contain the class "sent" so that the focus goes to "minLimit"
-       document.getElementById("maxLimit").classList.add("sent")
- 
-       //clean the input max so next time it is opened, the old value isnt exposed
-       setInputMax("")
-   }
- 
-   /* this const is called to sent the min limit */
-   const sendMin = () => {
- 
-       //the modal delimite integral its invisible
-       document.getElementById("delimiteIntegral").classList.add("d-none")
-       setMinLimit(inputMin)
- 
-       //the input min is clean
-       setInputMin("")
-   }
- 
-   /* if delimite integral is defined, this function is called at the end of calculation join the result */
-   function delimiteIntegral(result, max, min) {
-       //RIGHT EXAMPLE
-       // var str = "x^2+2x-5x + C",
-       //     str = str.replace(" ", "")
- 
-       // const a = []
- 
-       // var str = str.replace("+ C", "")
-       // var countOperators = 0
-       // var currentIndex = 0
- 
-       // for (var i = 0; i < str.length; i++) {
-       //     if (str.charAt(i) == "+" || str.charAt(i) == "-") {
-       //         var operat = str.substring(currentIndex, i)
-       //         a.push(operat)
-       //         currentIndex = i
- 
-       //         var aux = str.substring(currentIndex, str.length)
-       //         if (!aux.includes("+") || !aux.includes("-") && aux.length > 0)
-       //             a.push(aux)
-       //     }
-       // }
- 
-       // a.forEach(function (as) {
-       //     console.log(as)
-       // })
- 
-       const arrayX = [],
-           arrayMax = [],
-           arrayMin = []
- 
-       //remove const of result
-       var str = result.replace("+ C", ""),
-           currentIndex = 0
- 
-       //sorting out the elements by operator (+/-)
-       for (var i = 0; i < str.length; i++) {
-           if (str.charAt(i) == "+" || str.charAt(i) == "-") {
-               var operat = str.substring(currentIndex, i)
-               arrayX.push(operat)
-               currentIndex = i
- 
-               var aux = str.substring(currentIndex, str.length)
-               if (!aux.includes("+") || !aux.includes("-") && aux.length > 0)
-                   arrayX.push(aux)
-           }
-       }
- 
-       // //define the x with functions and
-       // arrayX.forEach(function (el) {
-       //     if (el.includes("/")) {
-       //         el = "(" + el + ")"
-       //     }
-       // })
- 
-       //define the mult of x and before, for example: 25x => 25*x
-       arrayX.forEach(function (el){
-           var bef = forLoopSum(0, el.indexOf("x"), el)
-           var aux = bef.replace("-", "")
-               aux = aux.replace("+", "")
-           var after = forLoopSum(el.indexOf("x"), el.length, el)
-           if(!(aux == "")){
-               el = bef + "*" + after
-           }
-       })
- 
-       //assigning arrayX to arrayMax/Min
-       arrayMax = arrayX
-       arrayMin = arrayX
- 
-       //replace x for max number
-       arrayMax.forEach(function(el){
-           if(el.includes("x"))
-               el.replace("x", max)
-       })
-      
-       arrayMin.forEach(function (el){
-           if(el.includes("x"))
-               el.replace("x", min)
-       })
- 
-       //calculating...
-       arrayMax.forEach(function (el) {
-          
-       })
-   }
- 
    /* this function will calculate every operation that has X, and has as parameter the operation and the operator */
    function calculateX(operat, op) {
        //this will take the before the X of the operation, for example: "2x^3" => 2
-       var before = forLoopSum(0, operat.indexOf(variableX), operat)
-       var potency;
+       var before = forLoopSum(0, operat.indexOf(variableX), operat),
+           potency;
  
        //if operat to contain potency, so the function forLoopSum will take the potency, else the potency is "1"
        if (operat.includes("^")) {
@@ -340,7 +209,7 @@ export default function Calculator() {
        var integral = potency + 1,
            //the simpl is for simplify the function, if need
            simpl = simplify(before + "/" + integral),
-           //the dataStr its to get the separate result of the simpl 
+           //the dataStr its to get the separate result of the simpl
            dataStr = simpl.split("/")
  
        //if integral = 0, then the x disappears
@@ -358,21 +227,18 @@ export default function Calculator() {
  
    /* this function will calculate every operation that has root, and has as parameter the operation and the operator */
    function calculateRoot(operat, op) {
- 
        //this will take the before the ( of the operation, for example: 2(root) => 2
        var before = forLoopSum(0, operat.indexOf("("), operat),
            potencyRoot = forLoopSum(operat.indexOf("(") + 1, operat.indexOf("^"), operat),
            content = forLoopSum(operat.indexOf(root) + 1, operat.indexOf(")"), operat),
            countX = forLoopSum(content.indexOf(root) + 1, content.indexOf(variableX), content),
            potencyX = ""
- 
        //if the content has potency, so the potencyX is this, else the potencyX is 1
        if (content.includes("^")) {
            potencyX = parseInt(forLoopSum(content.indexOf("^") + 1, content.length, content))
        } else {
            potencyX = 1
        }
- 
        //if the variables is empty, so the variables is 1
        if (before == "")
            before = 1
@@ -380,12 +246,10 @@ export default function Calculator() {
            potencyX = 1
        if (countX == "")
            countX = 1
- 
        //parse int variables for calculations
        parseInt(before)
        parseInt(potencyX)
        parseInt(countX)
- 
        //the result fraq is the sum of potencyroot with potencyX
        var resultFraq = sumFrac(potencyRoot, potencyX),
            //the resultconst is the result of constant between before mult countX
@@ -423,16 +287,13 @@ export default function Calculator() {
  
    /* this function will calculate every operation that has cos or sin, and has as parameter the operation and the operator */
    function calculateSinCos(operat, op) {
-       var before = "",
-           content = "",
+       var content = "",
            potencyX = 1,
            countX = "",
            fraq = "",
            resultCalcule = "",
            current = (operat.includes("sin")) ? "sin" : "cos",
            opposite = (current == "sin") ? "cos" : "sin"
- 
-       before = forLoopSum(0, operat.indexOf(current) + 3, operat)
  
        //content of cos/sin, for example: cos 2x ==> content is 2x
        content = forLoopSum(operat.indexOf(current) + 3, operat.length, operat)
@@ -442,21 +303,20 @@ export default function Calculator() {
            potencyX = forLoopSum(content.indexOf("^"), content.length, content)
  
        countX = content.substring(0, content.length - 1)
- 
-       if (countX == "")
-           countX = "1"
+       countX = (countX == "") ? "1" : countX
  
        fraq = simplify(1 + "/" + countX)
  
        if (potencyX == 1) {
+           var aux = fraq + opposite + "(" + content + ")"
            if (countX.includes("-") && op == "-")
-               resultCalcule = ((current = "cos") ? "" : op) + fraq + opposite + "(" + content + ")"
+               resultCalcule = ((current = "cos") ? "" : op) + aux
            else if (countX.includes("-"))
-               resultCalcule = ((current = "cos") ? "-" : "") + fraq + opposite + "(" + content + ")"
+               resultCalcule = ((current = "cos") ? "-" : "") + aux
            else if (op == "-")
                resultCalcule = ((current = "cos") ? op : "-") + fraq + opposite + "(" + countX + "x)"
            else
-               resultCalcule = fraq + opposite + "(" + content + ")"
+               resultCalcule = aux
        } else
            resultCalcule = op + current + "(" + content + ")"
        setResult(result + resultCalcule)
@@ -485,6 +345,7 @@ export default function Calculator() {
            operation(currentOperation, currentOperator)
        else
            operation(currentOperation, currentOperator)
+ 
        document.getElementById("inputCalculation").classList.add("d-none")
        document.getElementById("inputResult").classList.remove("d-none")
    }
@@ -511,12 +372,14 @@ export default function Calculator() {
        for (var i = start; i < end; i++) {
            c += word.charAt(i)
        }
-       console.log(c)
        return c
    }
  
    return (
        <div class="container mt-4">
+           <div className='warning'>
+               <a className='' data-bs-toggle="modal" data-bs-target="#infoModal">Hello, see how i work!</a>
+           </div>
            <div id="calculator" class="w-50 m-auto bg-dark p-4 text-center">
                <div class="text-center" id="inputCalculation">
                    <input type="text" name="input-calculation" class="w-75 m-4 rounded-pill pt-3 bg-light fs-5 text-end input-calculation" value={inputCalculation} onChange={(e) => setInputCalculation(e.target.value)} disabled />
@@ -533,45 +396,13 @@ export default function Calculator() {
                        <div class="col-5">
                            <button class="btn btn-danger rounded-3 w-100" onClick={() => removeAll()}>CE</button>
                        </div>
-                       <div class="col-2">
-                           <div class="group-input-check w-100 h-100">
-                               <input type="checkbox" name="definite-integral" onChange={(e) => changeModalDelimiteIntegral(e.target.checked)} />
-                               <label for="definite-integral" class="text-white ms-2">D.I?</label>
-                           </div>
-                       </div>
-                   </div>
- 
-                   {/* Limit Integral Text */}
-                   <div class="row d-none" id="limitOfIntegralText">
-                       <div class="col text-start">
-                           <small class="text-white">Limit of integral: {minLimit} to {maxLimit}</small>
-                       </div>
-                   </div>
- 
-                   {/* Delimite Integral */}
-                   <div class="row mt-3 text-center d-none" id="delimiteIntegral">
-                       <div class="col-1 icon-question">
-                           <div class="v-middle w-100 h-100">
-                               <i class="fa-solid fa-circle-question text-white" data-bs-toggle="tooltip" data-bs-placement="top" title="write the maximum and minimum limit of the integral"></i>
-                           </div>
-                       </div>
-                       <div class="col" id="maxLimit">
-                           <label for="max" class="text-white">Max:</label>
-                           <input type="text" name="max" class="bg-light rounded-pill w-25" value={inputMax} disabled />
-                           <button class="btn btn-success rounded-pill p-1 ps-3 pe-3 ms-1" onClick={() => sendMax()}><small><i class="fa-solid fa-check"></i></small></button>
-                       </div>
-                       <div class="col text-start" id="minLimit">
-                           <label for="min" class="text-white">Min:</label>
-                           <input type="text" name="min" class="bg-light rounded-pill w-25" value={inputMin} disabled />
-                           <button class="btn btn-success rounded-pill p-1 ps-3 pe-3 ms-1" onClick={() => sendMin()}><small><i class="fa-solid fa-check"></i></small></button>
-                       </div>
                    </div>
  
                    {/* Root Input */}
                    <div class="row mt-3 text-center d-none" id="rootPotencyIntegral">
                        <div className='row'>
                            <div className='col text-end'>
-                               <button className='text-end btn btn-danger rounded-circle close-div' onClick={() => changeRootModal("")}><i class="fa-solid fa-xmark"></i></button>
+                               <button className='text-end btn btn-danger rounded-circle close-div' onClick={() => changeModal("rootPotencyIntegral", "")}><i class="fa-solid fa-xmark"></i></button>
                            </div>
                        </div>
                        <div class="col w-100">
@@ -590,7 +421,7 @@ export default function Calculator() {
                    <div class="row mt-3 text-center d-none" id="potencyIntegral">
                        <div className='row'>
                            <div className='col text-end'>
-                               <button className='text-end btn btn-danger rounded-circle close-div' onClick={() => changePotencyModal("")}><i class="fa-solid fa-xmark"></i></button>
+                               <button className='text-end btn btn-danger rounded-circle close-div' onClick={() => changeModal("potencyIntegral", "")}><i class="fa-solid fa-xmark"></i></button>
                            </div>
                        </div>
                        <div class="col w-100">
@@ -650,13 +481,13 @@ export default function Calculator() {
                                    <button class="btn btn-secondary rounded-3" onClick={() => insert(0)}>0</button>
                                </div>
                                <div class="col-3">
-                                   <button class="btn btn-primary rounded-3" onClick={() => changePotencyModal(exponential)}>eⁿ</button>
+                                   <button class="btn btn-primary rounded-3" onClick={() => changeModal("potencyIntegral", exponential)}>eⁿ</button>
                                </div>
                                <div class="col-3">
-                                   <button class="btn btn-primary rounded-3" onClick={() => changeRootModal(root)}>ⁿ√</button>
+                                   <button class="btn btn-primary rounded-3" onClick={() => changeModal("rootPotencyIntegral", root)}>ⁿ√</button>
                                </div>
                                <div class="col-3">
-                                   <button class="btn btn-primary rounded-3" onClick={() => changePotencyModal(variableX)}>xⁿ</button>
+                                   <button class="btn btn-primary rounded-3" onClick={() => changeModal("potencyIntegral", variableX)}>xⁿ</button>
                                </div>
                            </div>
                            <div class="row mt-3">
@@ -674,9 +505,37 @@ export default function Calculator() {
                    </div>
                </div>
            </div>
+ 
+           <div class="modal fade" id="infoModal" tabindex="-1" aria-labelledby="infoModalLabel" aria-hidden="true">
+               <div class="modal-dialog">
+                   <div class="modal-content">
+                       <div class="modal-header">
+                           <h5 class="modal-title" id="infoModalLabel">About Me</h5>
+                           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                       </div>
+                       <div class="modal-body">
+                           <h5>Hello welcome!</h5>
+                           <p>Well, here is some important information about me. You need to know that I'm still simple, my developer is creating me little by little. So at this point, I just do individual integrals, with addition and subtraction. Here are some examples for you to understand better:</p>
+                           <ul class="text-start">
+                               <li>∫x²</li>
+                               <li>∫cosx</li>
+                               <li>∫√x²</li>
+                               <li>∫2 + x⁴</li>
+                           </ul>
+                           <p>Oh! And if you want to collaborate and help me grow and have more features, you can <a href='https://www.linkedin.com/in/erika-reis-da-silva-b64521187/'>contact</a> my developer, and if you're interested in seeing how I was built, check out my <a href='https://github.com/erika393/integral-calculator-react'>code</a></p>
+                       </div>
+                   </div>
+               </div>
+           </div>
        </div>
    )
 }
+ 
+ 
+ 
+ 
+ 
+ 
  
  
  
